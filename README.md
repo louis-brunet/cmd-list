@@ -8,6 +8,6 @@ cargo run -- --help
 
 
 ```bash
-cargo run -- --format=header --format-header-size=1 ls -- -l -a -al '-l -a'
+cargo run -- --output-format=header --format-header-size=1 --cmd ls -- -l -a -al '-l -a'
 ```
 
