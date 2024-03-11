@@ -1,25 +1,53 @@
-use clap::{builder::styling::AnsiColor, Args, Parser, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Run sub commands
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct CliArgs {
-    /// Display format
-    #[command(flatten)]
-    // #[command(subcommand)]
-    pub format: Format,
+    #[command(subcommand)]
+    pub command: CliCommand,
+}
 
-    /// The shell used to evaluate the commands
-    #[arg(long, value_enum, default_value_t = ShellArg::Bash)]
-    pub shell: ShellArg,
+#[derive(Debug, Subcommand)]
+pub enum CliCommand {
+    /// Generate files
+    #[command(visible_alias = "g")]
+    Gen {
+        #[command(subcommand)]
+        command: GenCommand,
+    },
 
-    /// The command to run as many times as there are argument strings
-    #[arg(long)]
-    pub cmd: String,
+    /// Run a command with different arguments and format the output
+    #[command(visible_alias = "r")]
+    Run {
+        /// Display format
+        #[command(flatten)]
+        format: Format,
 
-    /// The arguments for each call of the given command
-    #[arg(num_args=1.., required = true, last = true)]
-    pub cmd_args: Vec<String>,
+        /// The shell used to evaluate the commands
+        #[arg(long, value_enum, default_value_t = ShellArg::Bash)]
+        shell: ShellArg,
+
+        /// The command to run as many times as there are argument strings
+        #[arg()]
+        cmd: String,
+
+        /// The arguments for each call of the given command
+        #[arg(num_args=1.., required = true, last = true)]
+        cmd_args: Vec<String>,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum GenCommand {
+    Completion {
+        #[arg(value_enum)]
+        completion_target: ShellArg,
+
+        /// The name of the command for which to generate a completion script
+        #[arg(default_value_t = String::from("cmd-list"))]
+        bin_name: String,
+    },
 }
 
 #[derive(ValueEnum, Debug, Clone)]
@@ -82,17 +110,17 @@ pub struct FormatHeaderArgs {
     pub format_header_size: u8,
 
     ///
-    #[arg(long, default_value_t = 1)]
+    #[arg(long, default_value_t = 240)]
     pub format_header_color: u8,
 
     ///
-    #[arg(long, default_value_t = 2)]
+    #[arg(long, default_value_t = 245)]
     pub format_header_body_color: u8,
 }
 
 #[derive(Args, Debug, Clone)]
 pub struct FormatSimpleArgs {
-    #[arg(long, default_value_t = 243)]
+    #[arg(long, default_value_t = 245)]
     pub format_simple_color: u8,
 }
 

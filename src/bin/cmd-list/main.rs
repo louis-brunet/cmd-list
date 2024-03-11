@@ -3,10 +3,10 @@ use std::{
     process::ChildStdout,
 };
 
-use args::{Format, FormatClass, ShellArg};
+use args::{CliCommand, Format, FormatClass, GenCommand, ShellArg};
 use clap::{
     builder::styling::{Ansi256Color, Color, Style},
-    Parser,
+    CommandFactory, Parser,
 };
 use cmd_list::{
     command_formatter::CommandFormatter,
@@ -30,8 +30,12 @@ fn get_output_formatter(
             Box::new(FormatSimple::new(simple_style))
         }
         FormatClass::Header => {
-            let header_style = Style::new().fg_color(Some(Color::Ansi256(Ansi256Color::from(format.header.format_header_color))));
-            let body_style = Style::new().fg_color(Some(Color::Ansi256(Ansi256Color::from(format.header.format_header_body_color))));
+            let header_style = Style::new().fg_color(Some(Color::Ansi256(Ansi256Color::from(
+                format.header.format_header_color,
+            ))));
+            let body_style = Style::new().fg_color(Some(Color::Ansi256(Ansi256Color::from(
+                format.header.format_header_body_color,
+            ))));
 
             Box::new(FormatHeader::new(
                 header_style,
@@ -83,33 +87,62 @@ fn get_command_formatter(cmd_format: &args::CommandFormatArgs) -> CommandFormatt
 fn main() {
     let args = CliArgs::parse();
 
-    let command_formatter = get_command_formatter(&args.format.cmd_format);
-    let output_formatter = get_output_formatter(&args.format);
-    let separator = args
-        .format
-        .format_separator
-        .replace("\\n", "\n")
-        .replace("\\t", "\t");
-    let shell = match args.shell {
-        ShellArg::Bash => "bash",
-        ShellArg::Zsh => "zsh",
-    };
+    match args.command {
+        CliCommand::Gen {
+            command: gen_command,
+        } => match gen_command {
+            GenCommand::Completion {
+                completion_target,
+                bin_name,
+            } => {
+                let clap_target = match completion_target {
+                    ShellArg::Bash => clap_complete::Shell::Bash,
+                    ShellArg::Zsh => clap_complete::Shell::Zsh,
+                };
 
-    let mut out_stream = std::io::stdout();
-    for arg in args.cmd_args {
-        command_formatter
-            .display_command(&mut out_stream, args.cmd.as_str(), arg.as_str())
-            .expect("display_command");
+                clap_complete::generate(
+                    clap_target,
+                    &mut CliArgs::command(),
+                    bin_name,
+                    &mut std::io::stdout(),
+                );
+            }
+        },
 
-        let o = CommandRunner::run_command(shell, args.cmd.as_str(), arg.as_str())
-            .expect("run_command failed");
+        CliCommand::Run {
+            format,
+            shell,
+            cmd,
+            cmd_args,
+        } => {
+            let command_formatter = get_command_formatter(&format.cmd_format);
+            let output_formatter = get_output_formatter(&format);
+            let separator = format
+                .format_separator
+                .replace("\\n", "\n")
+                .replace("\\t", "\t");
+            let shell = match shell {
+                ShellArg::Bash => "bash",
+                ShellArg::Zsh => "zsh",
+            };
 
-        output_formatter
-            .pipe_stdout(&mut o.stdout.expect("child stdout"), &mut out_stream)
-            .expect("pipe_stdout");
+            let mut out_stream = std::io::stdout();
+            for arg in cmd_args {
+                command_formatter
+                    .display_command(&mut out_stream, cmd.as_str(), arg.as_str())
+                    .expect("display_command");
 
-        out_stream
-            .write_all(separator.as_bytes())
-            .expect("separator");
+                let o = CommandRunner::run_command(shell, cmd.as_str(), arg.as_str())
+                    .expect("run_command failed");
+
+                output_formatter
+                    .pipe_stdout(&mut o.stdout.expect("child stdout"), &mut out_stream)
+                    .expect("pipe_stdout");
+
+                out_stream
+                    .write_all(separator.as_bytes())
+                    .expect("separator");
+            }
+        }
     }
 }
