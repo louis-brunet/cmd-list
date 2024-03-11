@@ -11,14 +11,12 @@ pub struct CliArgs {
 #[derive(Debug, Subcommand)]
 pub enum CliCommand {
     /// Generate files
-    #[command(visible_alias = "g")]
     Gen {
         #[command(subcommand)]
         command: GenCommand,
     },
 
     /// Run a command with different arguments and format the output
-    #[command(visible_alias = "r")]
     Run {
         /// Display format
         #[command(flatten)]
@@ -41,13 +39,25 @@ pub enum CliCommand {
 #[derive(Debug, Subcommand)]
 pub enum GenCommand {
     Completion {
-        #[arg(value_enum)]
-        completion_target: ShellArg,
+        #[arg(long = "shell", value_enum, default_value_t = GenCommandTargetShell::Auto)]
+        target_shell: GenCommandTargetShell,
 
         /// The name of the command for which to generate a completion script
-        #[arg(default_value_t = String::from("cmd-list"))]
+        #[arg(long, default_value_t = String::from("cmd-list"))]
         bin_name: String,
     },
+}
+
+#[derive(ValueEnum, Debug, Clone)]
+pub enum GenCommandTargetShell {
+    /// Try to determine from the environment
+    Auto,
+
+    Zsh,
+    Bash,
+    Fish,
+    Elvish,
+    PowerShell,
 }
 
 #[derive(ValueEnum, Debug, Clone)]
@@ -79,7 +89,7 @@ pub struct Format {
 #[derive(Args, Debug)]
 pub struct CommandFormatArgs {
     /// The preset formatter to use to display each command (not its output)
-    #[arg(long, value_enum, default_value_t = CommandFormatClass::Highlight)]
+    #[arg(short, long, value_enum, default_value_t = CommandFormatClass::Highlight)]
     pub cmd_format: CommandFormatClass,
 
     /// Prefix inserted before each command
@@ -109,12 +119,10 @@ pub struct FormatHeaderArgs {
     #[arg(long, default_value_t = 1)]
     pub format_header_size: u8,
 
-    ///
     #[arg(long, default_value_t = 240)]
     pub format_header_color: u8,
 
-    ///
-    #[arg(long, default_value_t = 245)]
+    #[arg(long, default_value_t = 246)]
     pub format_header_body_color: u8,
 }
 

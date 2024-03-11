@@ -3,7 +3,7 @@ use std::{
     process::ChildStdout,
 };
 
-use args::{CliCommand, Format, FormatClass, GenCommand, ShellArg};
+use args::{CliCommand, Format, FormatClass, GenCommand, GenCommandTargetShell, ShellArg};
 use clap::{
     builder::styling::{Ansi256Color, Color, Style},
     CommandFactory, Parser,
@@ -90,24 +90,33 @@ fn main() {
     match args.command {
         CliCommand::Gen {
             command: gen_command,
-        } => match gen_command {
-            GenCommand::Completion {
-                completion_target,
-                bin_name,
-            } => {
-                let clap_target = match completion_target {
-                    ShellArg::Bash => clap_complete::Shell::Bash,
-                    ShellArg::Zsh => clap_complete::Shell::Zsh,
-                };
-
-                clap_complete::generate(
-                    clap_target,
-                    &mut CliArgs::command(),
+        } => {
+            match gen_command {
+                GenCommand::Completion {
+                    target_shell,
                     bin_name,
-                    &mut std::io::stdout(),
-                );
+                } => {
+                    // let clap_target_shell = target_shell
+                    let clap_target_shell = match target_shell {
+                        GenCommandTargetShell::Zsh => clap_complete::Shell::Zsh,
+                        GenCommandTargetShell::Bash => clap_complete::Shell::Bash,
+                        GenCommandTargetShell::Fish => clap_complete::Shell::Fish,
+                        GenCommandTargetShell::Elvish => clap_complete::Shell::Elvish,
+                        GenCommandTargetShell::PowerShell => clap_complete::Shell::PowerShell,
+
+                        GenCommandTargetShell::Auto => clap_complete::Shell::from_env()
+                            .expect("could not determine user shell from env, please specify a target shell"),
+                    };
+
+                    clap_complete::generate(
+                        clap_target_shell,
+                        &mut CliArgs::command(),
+                        bin_name,
+                        &mut std::io::stdout(),
+                    );
+                }
             }
-        },
+        }
 
         CliCommand::Run {
             format,
