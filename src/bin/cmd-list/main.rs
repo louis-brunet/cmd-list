@@ -9,8 +9,7 @@ use clap::{
     Parser,
 };
 use cmd_list::{
-    consumer::{CommandFormatter, FormatHeader, FormatNone, FormatSimple, StdoutConsumer},
-    runner::CommandRunner,
+    command_formatter::CommandFormatter, runner::CommandRunner, output_formatter::{FormatHeader, FormatNone, FormatSimple, StdoutConsumer}
 };
 
 use crate::args::CliArgs;
@@ -39,40 +38,6 @@ fn get_output_formatter(
             ))
         }
         FormatClass::None => Box::new(FormatNone),
-    }
-}
-
-fn main() {
-    let args = CliArgs::parse();
-
-    let command_formatter = get_command_formatter(&args.format.cmd_format);
-    let output_formatter = get_output_formatter(&args.format);
-    let separator = args
-        .format
-        .format_separator
-        .replace("\\n", "\n")
-        .replace("\\t", "\t");
-    let shell = match args.shell {
-        ShellArg::Bash => "bash",
-        ShellArg::Zsh => "zsh",
-    };
-
-    let mut out_stream = std::io::stdout();
-    for arg in args.cmd_args {
-        command_formatter
-            .display_command(&mut out_stream, args.cmd.as_str(), arg.as_str())
-            .expect("display_command");
-
-        let o = CommandRunner::run_command(shell, args.cmd.as_str(), arg.as_str())
-            .expect("run_command failed");
-
-        output_formatter
-            .pipe_stdout(&mut o.stdout.expect("child stdout"), &mut out_stream)
-            .expect("pipe_stdout");
-
-        out_stream
-            .write_all(separator.as_bytes())
-            .expect("separator");
     }
 }
 
@@ -110,5 +75,39 @@ fn get_command_formatter(cmd_format: &args::CommandFormatArgs) -> CommandFormatt
         }
 
         args::CommandFormatClass::None => todo!(),
+    }
+}
+
+fn main() {
+    let args = CliArgs::parse();
+
+    let command_formatter = get_command_formatter(&args.format.cmd_format);
+    let output_formatter = get_output_formatter(&args.format);
+    let separator = args
+        .format
+        .format_separator
+        .replace("\\n", "\n")
+        .replace("\\t", "\t");
+    let shell = match args.shell {
+        ShellArg::Bash => "bash",
+        ShellArg::Zsh => "zsh",
+    };
+
+    let mut out_stream = std::io::stdout();
+    for arg in args.cmd_args {
+        command_formatter
+            .display_command(&mut out_stream, args.cmd.as_str(), arg.as_str())
+            .expect("display_command");
+
+        let o = CommandRunner::run_command(shell, args.cmd.as_str(), arg.as_str())
+            .expect("run_command failed");
+
+        output_formatter
+            .pipe_stdout(&mut o.stdout.expect("child stdout"), &mut out_stream)
+            .expect("pipe_stdout");
+
+        out_stream
+            .write_all(separator.as_bytes())
+            .expect("separator");
     }
 }

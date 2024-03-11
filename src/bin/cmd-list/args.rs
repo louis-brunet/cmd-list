@@ -9,6 +9,7 @@ pub struct CliArgs {
     // #[command(subcommand)]
     pub format: Format,
 
+    /// The shell used to evaluate the commands
     #[arg(long, value_enum, default_value_t = ShellArg::Bash)]
     pub shell: ShellArg,
 
@@ -37,7 +38,7 @@ pub struct Format {
     #[command(flatten)]
     pub cmd_format: CommandFormatArgs,
 
-    ///
+    /// The preset formatter to use for the command output
     #[arg(short, long, value_enum, default_value_t = FormatClass::Simple)]
     pub output_format: FormatClass,
 
@@ -54,18 +55,22 @@ pub struct Format {
 
 #[derive(Args, Debug)]
 pub struct CommandFormatArgs {
+    /// The preset formatter to use to display each command (not its output)
     #[arg(long, value_enum, default_value_t = CommandFormatClass::Highlight)]
     pub cmd_format: CommandFormatClass,
 
+    /// Prefix inserted before each command
     #[arg(long, default_value_t = String::from("> "))]
     pub cmd_format_prefix: String,
 
+    /// Which ANSI color code to use when the 'highlight' preset is used
     #[arg(long, default_value_t = 3)]
     pub cmd_format_highlight_color: u8,
 }
 
 #[derive(Debug, ValueEnum, Clone)]
 pub enum CommandFormatClass {
+    /// Display the command name in the same style as its arguments
     Plain,
 
     /// Print the command's arguments in a different style
@@ -76,8 +81,6 @@ pub enum CommandFormatClass {
 }
 
 #[derive(Args, Debug, Clone)]
-// #[group(id = "format-header", conflicts_with_all = ["format-simple"])]
-// #[group(id = "format-header", conflicts_with = "format-simple")]
 pub struct FormatHeaderArgs {
     /// Number of header lines for --format=header
     #[arg(long, default_value_t = 1)]
@@ -85,8 +88,6 @@ pub struct FormatHeaderArgs {
 }
 
 #[derive(Args, Debug, Clone)]
-// #[group(id = "format-simple", conflicts_with_all = ["format-header"])]
-// #[group(id = "format-simple", conflicts_with = "format-header")]
 pub struct FormatSimpleArgs {
     #[arg(long, default_value_t = 243)]
     pub format_simple_color_ansi: u8,

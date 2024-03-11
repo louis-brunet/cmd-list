@@ -11,8 +11,7 @@ pub enum CommandRunnerError {
 }
 
 #[derive(Debug)]
-pub struct CommandRunner {
-}
+pub struct CommandRunner {}
 
 impl CommandRunner {
     pub fn run_command(
@@ -24,9 +23,8 @@ impl CommandRunner {
     ) -> Result<Child, CommandRunnerError> {
         let concatenated = format!("{} {}", cmd, args);
         let mut cmd = std::process::Command::new(shell);
-        cmd.arg("-c").arg(concatenated)// .args(args)
-        // let mut cmd = std::process::Command::new(cmd);
-        // cmd.args(args)
+        cmd.arg("-c")
+            .arg(concatenated)
             .stdin(Stdio::inherit())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
