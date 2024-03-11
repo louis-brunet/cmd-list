@@ -9,9 +9,19 @@ pub struct CommandFormatter<'prefix> {
     args_style: Style,
 }
 
-impl<'prefix> CommandFormatter<'prefix>{
-    pub fn new(prefix: &'prefix str, prefix_style: Style, cmd_style: Style, args_style: Style) -> Self {
-        Self { prefix, prefix_style, cmd_style, args_style }
+impl<'prefix> CommandFormatter<'prefix> {
+    pub fn new(
+        prefix: &'prefix str,
+        prefix_style: Style,
+        cmd_style: Style,
+        args_style: Style,
+    ) -> Self {
+        Self {
+            prefix,
+            prefix_style,
+            cmd_style,
+            args_style,
+        }
     }
 
     pub fn display_command<Out: Write>(
@@ -32,5 +42,3 @@ impl<'prefix> CommandFormatter<'prefix>{
         Ok(())
     }
 }
-
-

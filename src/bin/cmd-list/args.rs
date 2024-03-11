@@ -34,7 +34,6 @@ pub enum ShellArg {
 
 #[derive(Args, Debug)]
 pub struct Format {
-
     #[command(flatten)]
     pub cmd_format: CommandFormatArgs,
 

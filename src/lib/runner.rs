@@ -14,13 +14,7 @@ pub enum CommandRunnerError {
 pub struct CommandRunner {}
 
 impl CommandRunner {
-    pub fn run_command(
-        // &self,
-        shell: &str,
-        cmd: &str,
-        args: &str,
-        // args: Vec<&str>,
-    ) -> Result<Child, CommandRunnerError> {
+    pub fn run_command(shell: &str, cmd: &str, args: &str) -> Result<Child, CommandRunnerError> {
         let concatenated = format!("{} {}", cmd, args);
         let mut cmd = std::process::Command::new(shell);
         cmd.arg("-c")

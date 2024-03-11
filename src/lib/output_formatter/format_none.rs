@@ -11,5 +11,3 @@ impl<In: Read, Out: Write> StdoutConsumer<In, Out> for FormatNone {
         std::io::copy(in_stream, out_stream).map(|_| ())
     }
 }
-
-

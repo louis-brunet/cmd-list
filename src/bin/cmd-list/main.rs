@@ -9,7 +9,9 @@ use clap::{
     Parser,
 };
 use cmd_list::{
-    command_formatter::CommandFormatter, runner::CommandRunner, output_formatter::{FormatHeader, FormatNone, FormatSimple, StdoutConsumer}
+    command_formatter::CommandFormatter,
+    output_formatter::{FormatHeader, FormatNone, FormatSimple, StdoutConsumer},
+    runner::CommandRunner,
 };
 
 use crate::args::CliArgs;
