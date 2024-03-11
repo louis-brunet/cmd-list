@@ -5,7 +5,7 @@ use std::{
 
 use args::{Format, FormatClass, ShellArg};
 use clap::{
-    builder::styling::{Ansi256Color, AnsiColor, Color, Style},
+    builder::styling::{Ansi256Color, Color, Style},
     Parser,
 };
 use cmd_list::{
@@ -24,14 +24,14 @@ fn get_output_formatter(
     match format.output_format {
         FormatClass::Simple => {
             let simple_color =
-                Color::Ansi256(Ansi256Color::from(format.simple.format_simple_color_ansi));
+                Color::Ansi256(Ansi256Color::from(format.simple.format_simple_color));
             let simple_style = Style::new().fg_color(Some(simple_color));
 
             Box::new(FormatSimple::new(simple_style))
         }
         FormatClass::Header => {
-            let header_style = Style::new().fg_color(Some(Color::Ansi(AnsiColor::BrightBlack)));
-            let body_style = Style::new().fg_color(Some(Color::Ansi(AnsiColor::Green)));
+            let header_style = Style::new().fg_color(Some(Color::Ansi256(Ansi256Color::from(format.header.format_header_color))));
+            let body_style = Style::new().fg_color(Some(Color::Ansi256(Ansi256Color::from(format.header.format_header_body_color))));
 
             Box::new(FormatHeader::new(
                 header_style,

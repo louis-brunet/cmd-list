@@ -1,4 +1,4 @@
-use clap::{Args, Parser, ValueEnum};
+use clap::{builder::styling::AnsiColor, Args, Parser, ValueEnum};
 
 /// Run sub commands
 #[derive(Parser, Debug)]
@@ -13,15 +13,11 @@ pub struct CliArgs {
     #[arg(long, value_enum, default_value_t = ShellArg::Bash)]
     pub shell: ShellArg,
 
-    // #[arg(value_enum, short, long, default_value_t = FormatArg::Simple)]
-    // pub format: FormatArg,
     /// The command to run as many times as there are argument strings
-    // #[arg()]
     #[arg(long)]
     pub cmd: String,
 
     /// The arguments for each call of the given command
-    // #[arg(short, long, num_args=1..)]
     #[arg(num_args=1.., required = true, last = true)]
     pub cmd_args: Vec<String>,
 }
@@ -84,12 +80,20 @@ pub struct FormatHeaderArgs {
     /// Number of header lines for --format=header
     #[arg(long, default_value_t = 1)]
     pub format_header_size: u8,
+
+    ///
+    #[arg(long, default_value_t = 1)]
+    pub format_header_color: u8,
+
+    ///
+    #[arg(long, default_value_t = 2)]
+    pub format_header_body_color: u8,
 }
 
 #[derive(Args, Debug, Clone)]
 pub struct FormatSimpleArgs {
     #[arg(long, default_value_t = 243)]
-    pub format_simple_color_ansi: u8,
+    pub format_simple_color: u8,
 }
 
 #[derive(ValueEnum, Clone, Debug)]

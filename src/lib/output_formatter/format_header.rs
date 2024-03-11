@@ -45,4 +45,3 @@ impl<In: Read, Out: Write> StdoutConsumer<In, Out> for FormatHeader {
         Ok(())
     }
 }
-
